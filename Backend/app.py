@@ -20,7 +20,6 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
 
-    # Register routes
     from routes.auth_routes import auth_bp
     from routes.doctor_routes import doctor_bp
     from routes.appointment_routes import appointment_bp

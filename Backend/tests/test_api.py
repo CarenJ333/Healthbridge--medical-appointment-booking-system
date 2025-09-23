@@ -25,6 +25,5 @@ def test_register_patient(client):
     assert data["email"] == "patient@test.com"
 
 def test_doctor_availability_endpoint(client):
-    # Example test for doctor endpoint (will require Marshel’s API)
     response = client.get("/doctors")
     assert response.status_code == 200
