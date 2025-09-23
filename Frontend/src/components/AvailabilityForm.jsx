@@ -15,34 +15,45 @@ const AvailabilityForm = () => {
   });
 
   return (
-    <Formik
-      initialValues={{ day: "", start_time: "", end_time: "" }}
-      validationSchema={schema}
-      onSubmit={(values) => console.log("Availability set:", values)}
-    >
-      <Form>
-        <label>Day</label>
-        <Field as="select" name="day">
-          <option value="">-- Select Day --</option>
-          <option value="Monday">Monday</option>
-          <option value="Tuesday">Tuesday</option>
-          <option value="Wednesday">Wednesday</option>
-          <option value="Thursday">Thursday</option>
-          <option value="Friday">Friday</option>
-        </Field>
-        <ErrorMessage name="day" component="div" />
+  <div className="form-card">
+      <h2>Set Doctor Availability</h2>
+      <Formik
+        initialValues={{ day: "", start_time: "", end_time: "" }}
+        validationSchema={schema}
+        onSubmit={(values) => console.log("Availability set:", values)}
+      >
+        <Form className="form-grid">
+          <div className="form-group">
+            <label className="form-label" htmlFor="day">Day</label>
+            <Field as="select" id="day" name="day" className="form-select">
+              <option value="">-- Select Day --</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </Field>
+            <ErrorMessage name="day" component="div" className="error" />
+          </div>
 
-        <label>Start Time</label>
-        <Field type="time" name="start_time" />
-        <ErrorMessage name="start_time" component="div" />
+          <div className="form-group">
+            <label className="form-label" htmlFor="start_time">Start Time</label>
+            <Field type="time" id="start_time" name="start_time" className="form-time" />
+            <ErrorMessage name="start_time" component="div" className="error" />
+          </div>
 
-        <label>End Time</label>
-        <Field type="time" name="end_time" />
-        <ErrorMessage name="end_time" component="div" />
+          <div className="form-group">
+            <label className="form-label" htmlFor="end_time">End Time</label>
+            <Field type="time" id="end_time" name="end_time" className="form-time" />
+            <ErrorMessage name="end_time" component="div" className="error" />
+          </div>
 
-        <button type="submit">Set Availability</button>
-      </Form>
-    </Formik>
+          <div className="full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="submit" className="btn">Set Availability</button>
+          </div>
+        </Form>
+      </Formik>
+    </div>
   );
 };
 

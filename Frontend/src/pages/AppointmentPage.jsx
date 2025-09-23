@@ -4,7 +4,7 @@ import AppointmentForm from "../components/AppointmentForm";
 export default function AppointmentPage() {
   return (
     <div>
-      <h1>Book Appointment</h1>
+      <h1 style= {{ textAlign: "center", marginBottom: "20px" }}>Book Appointment</h1>
       <AppointmentForm />
     </div>
   );
