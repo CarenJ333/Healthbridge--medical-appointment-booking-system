@@ -2,10 +2,14 @@
 from flask import Blueprint, jsonify
 from models import Doctor
 
-doctor_bp = Blueprint("doctor", __name__)
+doctors_bp = Blueprint("doctors", __name__, url_prefix="/doctors")
 
-@doctor_bp.route("/", methods=["GET"])
-def get_doctors():
-    doctors = Doctor.query.all()
-    result = [{"id": d.id, "specialization": d.specialization, "availability": d.availability} for d in doctors]
-    return jsonify(result), 200
+@doctors_bp.route("", methods=["GET"])
+def list_doctors():
+    return jsonify([doc.to_dict() for doc in Doctor.query.all()]), 200
+
+@doctors_bp.route("/<int:id>", methods=["GET"])
+def doctor_profile(id):
+    doc = Doctor.query.get_or_404(id)
+    return jsonify(doc.to_dict()), 200
+

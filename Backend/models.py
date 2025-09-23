@@ -1,28 +1,69 @@
 # sqlalchemy models(user, doctor, appointment)
-from app import db
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  
+    __tablename__ = "users"
 
-    doctor_profile = db.relationship("Doctor", backref="user", uselist=False)
-    appointments = db.relationship("Appointment", backref="patient", lazy=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, unique=True, nullable=False)
+    role = db.Column(db.String, nullable=False)  # "patient" or "doctor"
+
+    appointments = db.relationship("Appointment", back_populates="patient")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "role": self.role,
+        }
+
 
 class Doctor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    specialization = db.Column(db.String(100), nullable=False)
-    availability = db.Column(db.String(200)) 
+    __tablename__ = "doctors"
 
-    appointments = db.relationship("Appointment", backref="doctor", lazy=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    specialization = db.Column(db.String, nullable=False)
+
+    appointments = db.relationship("Appointment", back_populates="doctor")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "specialization": self.specialization,
+        }
+
 
 class Appointment(db.Model):
+    __tablename__ = "appointments"
+
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False)
-    appointment_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.String(20), default="pending")  
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctors.id"), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    appointment_time = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String, default="pending")  # pending, confirmed, declined
+
+    doctor = db.relationship("Doctor", back_populates="appointments")
+    patient = db.relationship("User", back_populates="appointments")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "doctorId": self.doctor_id,
+            "patientId": self.patient_id,
+            "appointmentTime": (
+                self.appointment_time.isoformat()
+                if self.appointment_time else None
+            ),
+            "status": self.status,
+            "doctor": self.doctor.to_dict() if self.doctor else None,
+            "patient": self.patient.to_dict() if self.patient else None,
+        }
+
