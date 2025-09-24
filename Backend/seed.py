@@ -8,20 +8,20 @@ with app.app_context():
     db.create_all()
 
     # Users
-    admin = User(username="admin", email="admin@example.com", is_admin=True)
+    admin = User(username="admin", email="admin@gmail.com", is_admin=True)
     admin.set_password("adminpass")
-    user1 = User(username="alice", email="alice@gmail.com"); user1.set_password("alicepass")
-    user2 = User(username="bob", email="bob@gmail.com"); user2.set_password("bobpass")
-    user3 = User(username="charlie", email="charlie@gmail.com"); user3.set_password("charliepass")
-    user4 = User(username="diana", email="diana@gmail.com"); user4.set_password("dianapass")
-    user5 = User(username="earnest", email="earnest@gmail.com"); user5.set_password("earnestpass")
+    user1 = User(username="Alice", email="alice@gmail.com"); user1.set_password("alicepass")
+    user2 = User(username="Bob", email="bob@gmail.com"); user2.set_password("bobpass")
+    user3 = User(username="Charlie", email="charlie@gmail.com"); user3.set_password("charliepass")
+    user4 = User(username="Diana", email="diana@gmail.com"); user4.set_password("dianapass")
+    user5 = User(username="Earnest", email="earnest@gmail.com"); user5.set_password("earnestpass")
     user6 = User(username="Caren", email="caren@gmail.com"); user6.set_password("carenpass")
     user7 = User(username="Fredrick", email="fredrick@gmail.com"); user7.set_password("fredrickpass")
     user8 = User(username="Marshel", email="marshel@gmail.com"); user8.set_password("marshelpass")
 
     # Doctors
-    d1 = Doctor(name="Dr. Grace", specialty="Cardiology", available=True, contact_email="grace@clinic.example")
-    d2 = Doctor(name="Dr. Omar", specialty="General", available=True, contact_email="omar@clinic.example")
+    d1 = Doctor(name="Dr. Grace", specialty="Cardiology", available=True, contact_email="grace@clinic.com")
+    d2 = Doctor(name="Dr. Omar", specialty="General", available=True, contact_email="omar@clinic.com")
 
     db.session.add_all([admin, user1, user2, user3, user4, user5, user6, user7, user8, d1, d2])
     db.session.commit()
