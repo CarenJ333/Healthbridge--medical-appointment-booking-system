@@ -1,115 +1,240 @@
-import React, { useState } from "react";
-import "../App.css";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-const PatientDashboard = ({ user, onLogout }) => {
-  const patientName = user?.name || "Patient";
+const PatientDashboard = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  // Local state for booking form
-  const [doctor, setDoctor] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleBookAppointment = (e) => {
-    e.preventDefault();
-    // TODO: send to backend
-    console.log("Booking:", { doctor, date, time });
-    alert(`Appointment booked with ${doctor} on ${date} at ${time}`);
+  // Fetch appointments from backend
+  useEffect(() => {
+    fetch("http://localhost:3000/appointments")
+      .then((res) => res.json())
+      .then((data) => {
+        // Filter so patient only sees their own
+        const myAppointments = data.filter(
+          (appt) => appt.patient === user.name
+        );
+        setAppointments(myAppointments);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching appointments:", err);
+        setLoading(false);
+      });
+  }, [user.name]);
+
+  // Cancel appointment
+  const cancelAppointment = (id) => {
+    fetch(`http://localhost:3000/appointments/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Canceled" }),
+    })
+      .then((res) => res.json())
+      .then((updated) =>
+        setAppointments(
+          appointments.map((a) => (a.id === id ? updated : a))
+        )
+      );
   };
 
+  // Book new appointment (example only — replace with form later)
+  const bookAppointment = () => {
+    const newAppointment = {
+      doctor: "Dr. John Doe (Dermatology)",
+      patient: user.name,
+      date: "2025-09-30",
+      time: "03:00 PM",
+      status: "Pending",
+    };
+
+    fetch("http://localhost:3000/appointments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newAppointment),
+    })
+      .then((res) => res.json())
+      .then((data) => setAppointments([...appointments, data]));
+  };
+
+  // Status colors
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Confirmed":
+        return "green";
+      case "Pending":
+        return "orange";
+      case "Canceled":
+        return "red";
+      default:
+        return "gray";
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  if (loading) return <p>Loading appointments...</p>;
+
   return (
-    <div className="patient-dashboard">
+    <div style={{ display: "flex", fontFamily: "Arial, sans-serif", minHeight: "100vh" }}>
       {/* Sidebar */}
-      <aside className="sidebar">
-        <h2>Housepital360</h2>
-        <ul>
-          <li>Dashboard</li>
-          <li>Appointments</li>
-          <li>Calendar</li>
-          <li>Lab Results</li>
-          <li>Pharmacy</li>
-          <li>Billing</li>
-          <li>Messages</li>
-          <li>Settings</li>
-          <li className="logout" onClick={onLogout}>Logout</li>
-        </ul>
-      </aside>
+      <div
+        style={{
+          width: "220px",
+          background: "#2f3542",
+          color: "white",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <div>
+          <h2
+            style={{ marginBottom: "40px", cursor: "pointer" }}
+            onClick={() => navigate("/dashboard")}
+          >
+            HealthBridge
+          </h2>
+          <p style={{ margin: "15px 0", cursor: "pointer" }} onClick={() => navigate("/dashboard")}>
+            Dashboard
+          </p>
+          <p style={{ margin: "15px 0", cursor: "pointer" }} onClick={() => navigate("/book-appointment")}>
+            Book Appointment
+          </p>
+          <p style={{ margin: "15px 0", cursor: "pointer" }} onClick={() => navigate("/appointments")}>
+            My Appointments
+          </p>
+          <p style={{ margin: "15px 0", cursor: "pointer" }} onClick={() => navigate("/profile")}>
+            Profile
+          </p>
+        </div>
+        <p
+          style={{ marginTop: "auto", cursor: "pointer", color: "#ff4757" }}
+          onClick={handleLogout}
+        >
+          Logout
+        </p>
+      </div>
 
       {/* Main Content */}
-      <main className="dashboard-main">
-        {/* Header */}
-        <header className="dashboard-header">
-          <h1>Welcome, {patientName} 👋</h1>
-        </header>
+      <div style={{ flex: 1, background: "#f1f2f6", padding: "20px" }}>
+        <h1 style={{ marginBottom: "20px" }}>Welcome, {user.name}!</h1>
 
-        {/* Top Action Buttons */}
-        <div className="top-actions">
-          <button>📅 Book Appointment</button>
-          <button>💊 Order Medicine</button>
-          <button>📑 View Reports</button>
-          <button>💳 Pay Bills</button>
-        </div>
-
-        {/* Dashboard Cards */}
-        <div className="cards-grid">
-          {/* Confirmed Appointments */}
-          <div className="card appointments">
-            <h3>Confirmed Appointments</h3>
-            <div className="appointment-item">
-              <p><strong>SIMON NUROGE</strong></p>
-              <p>7/9/2025 - In-person</p>
-              <span className="status confirmed">Confirmed</span>
-            </div>
-            <div className="appointment-item">
-              <p><strong>SIMON NUROGE</strong></p>
-              <p>7/7/2025 - Telemedicine</p>
-              <span className="status confirmed">Confirmed</span>
-            </div>
-            <div className="appointment-item">
-              <p><strong>John Doe</strong></p>
-              <p>10/10/2023 - Follow up</p>
-              <span className="status confirmed">Confirmed</span>
-            </div>
+        {/* Metrics */}
+        <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
+          <div style={{ flex: 1, background: "white", padding: "20px", borderRadius: "10px", textAlign: "center" }}>
+            <h3>Total Booked</h3>
+            <p style={{ fontSize: "24px", fontWeight: "bold" }}>{appointments.length}</p>
           </div>
-
-          {/* Book Appointment (with form) */}
-          <div className="card book-appointment">
-            <h3>Book an Appointment</h3>
-            <form className="appointment-form" onSubmit={handleBookAppointment}>
-              <label>Choose Doctor</label>
-              <select value={doctor} onChange={(e) => setDoctor(e.target.value)} required>
-                <option value="">-- Select Doctor --</option>
-                <option>Dr. Smith - Cardiologist</option>
-                <option>Dr. Lee - Dermatologist</option>
-                <option>Dr. Adams - Pediatrician</option>
-              </select>
-
-              <label>Date</label>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-
-              <label>Time</label>
-              <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
-
-              <button type="submit">Book Now</button>
-            </form>
-          </div>
-
-          {/* Lab Results */}
-          <div className="card lab-results">
-            <h3>Lab Results Summary</h3>
-            <p>No recent lab results.</p>
-          </div>
-
-          {/* Current Medications */}
-          <div className="card medications">
-            <h3>Current Medications</h3>
-            <p>
-              Your AI assistant is ready to help with medications, appointments,
-              and health questions.
+          <div style={{ flex: 1, background: "white", padding: "20px", borderRadius: "10px", textAlign: "center" }}>
+            <h3>Total Confirmed</h3>
+            <p style={{ fontSize: "24px", fontWeight: "bold", color: "green" }}>
+              {appointments.filter((a) => a.status === "Confirmed").length}
             </p>
-            <button className="chat-btn">Start Chat</button>
+          </div>
+          <div style={{ flex: 1, background: "white", padding: "20px", borderRadius: "10px", textAlign: "center" }}>
+            <h3>Total Pending</h3>
+            <p style={{ fontSize: "24px", fontWeight: "bold", color: "orange" }}>
+              {appointments.filter((a) => a.status === "Pending").length}
+            </p>
+          </div>
+          <div style={{ flex: 1, background: "white", padding: "20px", borderRadius: "10px", textAlign: "center" }}>
+            <h3>Total Canceled</h3>
+            <p style={{ fontSize: "24px", fontWeight: "bold", color: "red" }}>
+              {appointments.filter((a) => a.status === "Canceled").length}
+            </p>
           </div>
         </div>
-      </main>
+
+        {/* Appointment Table */}
+        <div style={{ background: "white", padding: "20px", borderRadius: "10px" }}>
+          <h2 style={{ marginBottom: "20px" }}>My Appointments</h2>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Doctor</th>
+                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Date</th>
+                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Time</th>
+                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Status</th>
+                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {appointments.map((appt) => (
+                <tr key={appt.id}>
+                  <td style={{ padding: "10px" }}>{appt.doctor}</td>
+                  <td style={{ padding: "10px" }}>{appt.date}</td>
+                  <td style={{ padding: "10px" }}>{appt.time}</td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      color: getStatusColor(appt.status),
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {appt.status}
+                  </td>
+                  <td style={{ padding: "10px" }}>
+                    {appt.status !== "Canceled" && (
+                      <button
+                        onClick={() => cancelAppointment(appt.id)}
+                        style={{
+                          padding: "5px 10px",
+                          marginRight: "5px",
+                          background: "#ff6b81",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      style={{
+                        padding: "5px 10px",
+                        background: "#1e90ff",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => navigate(`/reschedule/${appt.id}`)}
+                    >
+                      Reschedule
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Book Appointment Button */}
+          <button
+            style={{
+              marginTop: "20px",
+              padding: "10px 20px",
+              background: "#2ed573",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+            onClick={bookAppointment}
+          >
+            Book Appointment
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

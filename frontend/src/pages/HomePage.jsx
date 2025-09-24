@@ -1,15 +1,20 @@
-// src/pages/HomePage.jsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleBookAppointment = () => {
+    // Redirect to login page
+    navigate("/login");
+  };
+
   return (
     <div className="homepage">
-      {/* Hero Section */}
       <section className="hero">
         <div className="overlay"></div>
 
         <div className="hero-content">
-          {/* Left Content */}
           <div className="hero-text">
             <h1>
               Welcome to <span className="highlight">HealthBridge</span>
@@ -19,12 +24,13 @@ const HomePage = () => {
               anywhere.
             </p>
             <div className="buttons">
-              <button className="btn primary">Book Appointment</button>
+              <button className="btn primary" onClick={handleBookAppointment}>
+                Book Appointment
+              </button>
               <button className="btn secondary">Learn More</button>
             </div>
           </div>
 
-          {/* Right Image */}
           <div className="hero-image">
             <img src="/images/nurse.jpeg" alt="Doctors and Nurses" />
           </div>

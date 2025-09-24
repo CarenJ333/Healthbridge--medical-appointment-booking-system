@@ -1,7 +1,8 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
-import PatientDashboard from "../components/PatientDashboard";
+import Sidebar from "../components/Sidebar";
 import DoctorDashboard from "../components/DoctorDashboard";
+import PatientDashboard from "../components/PatientDashboard";
 
 const DashboardPage = () => {
   const { user, logout } = useAuth();
@@ -11,13 +12,19 @@ const DashboardPage = () => {
   }
 
   return (
-    <div>
-      <header>
-        <h1>Welcome, {user.name}</h1>
-        <button onClick={logout}>Logout</button>
-      </header>
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      {/* Sidebar */}
+      <Sidebar />
 
-      {user.role === "doctor" ? <DoctorDashboard /> : <PatientDashboard />}
+      {/* Main content */}
+      <main style={{ flex: 1, padding: "20px" }}>
+        <header style={{ marginBottom: "20px" }}>
+          <h1>Welcome, {user.name}</h1>
+          <button onClick={logout}>Logout</button>
+        </header>
+
+        {user.role === "doctor" ? <DoctorDashboard /> : <PatientDashboard />}
+      </main>
     </div>
   );
 };
