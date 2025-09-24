@@ -8,14 +8,14 @@ const AppointmentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user")); // logged in patient
+    const user = JSON.parse(localStorage.getItem("user"));
 
     try {
       const response = await fetch("http://localhost:5000/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          patient_id: user.id, // your backend must send this at login
+          patient_id: user.id,
           doctor_id: doctor,
           date,
           time,
