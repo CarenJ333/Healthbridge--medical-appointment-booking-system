@@ -73,16 +73,10 @@ const App = () => {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
-<<<<<<< HEAD
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/services" element={<ServicesPage />} />
-        <Route path="/contact" element={<ContactPage />} />      
-=======
           {/* Catch-all route for 404 */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Routes>
       </div>
->>>>>>> 7bef3fd295e332ed0f58acacc039514e0b551ceb
 
       <Footer /> 
     </div>
