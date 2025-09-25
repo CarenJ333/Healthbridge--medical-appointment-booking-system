@@ -26,7 +26,7 @@ with app.app_context():
                 role="doctor"
             )
             db.session.add(user)
-            db.session.flush()  # so user.id is available
+            db.session.flush()  
 
             doctor = Doctor(
                 user_id=user.id,

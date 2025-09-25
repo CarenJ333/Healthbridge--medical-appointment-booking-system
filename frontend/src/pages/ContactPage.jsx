@@ -1,19 +1,51 @@
 import "../App.css";
+
 export default function ContactPage() {
   return (
-    <div className="page-container">
-      <h1>Contact Us</h1>
-      <p>
-        We’d love to hear from you! Reach out to us through the following channels:
-      </p>
+    <div className="contact-page">
+    
+      <section className="contact-hero">
+        <div className="overlay"></div>
+        <div className="hero-content">
+          <h1>Get in <span className="highlight">Touch</span></h1>
+          <p>
+            Have questions or need assistance? We're here to help you 24/7.
+          </p>
+        </div>
+      </section>
 
-      <h2>Support</h2>
-      <p>Email: support@healthbridge.com</p>
-      <p>Phone: +123 456 789</p>
+      <section className="contact-info">
+        <h2>Contact Information</h2>
+        <div className="info-grid">
+          <div className="info-card">
+            <div className="info-icon"></div>
+            <h3>Email</h3>
+            <p>support@healthbridge.com</p>
+          </div>
 
-      <h2>Location</h2>
-      <p>HealthBridge HQ, Nairobi, Kenya</p>
+          <div className="info-card">
+            <div className="info-icon"></div>
+            <h3>Phone</h3>
+            <p>+254748257989</p>
+          </div>
 
+          <div className="info-card">
+            <div className="info-icon"></div>
+            <h3>Location</h3>
+            <p>HealthBridge HQ, Nairobi, Kenya</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="contact-form-section">
+        <h2>Send Us a Message</h2>
+        <form className="contact-form">
+          <input type="text" placeholder="Your Name" required />
+          <input type="email" placeholder="Your Email" required />
+          <textarea placeholder="Your Message" rows="5" required></textarea>
+          <button type="submit" className="btn primary">Send Message</button>
+        </form>
+      </section>
     </div>
   );
 }

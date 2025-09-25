@@ -4,7 +4,7 @@ from models.user import db
 from routes.auth_routes import auth_bp
 from routes.doctor_routes import doctor_bp
 from routes.appointment_routes import appointment_bp
-import os
+from config import Config   # import your Config class
 
 app = Flask(__name__)
 
