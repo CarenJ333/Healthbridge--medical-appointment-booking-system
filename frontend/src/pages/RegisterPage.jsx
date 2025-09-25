@@ -1,91 +1,71 @@
-// src/pages/RegisterPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
-const RegisterPage = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+export default function RegisterPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  // Update form state
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  // Handle registration
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/register", {
+      const response = await fetch("http://127.0.0.1:5000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email, password }), // no role here
       });
 
       const data = await response.json();
 
-      if (response.status === 201) {
-        alert("Registration successful! Please log in.");
-        navigate("/login");
+      if (response.ok) {
+        setSuccess(data.message);
+        setError("");
+        setEmail("");
+        setPassword("");
+
+        // Redirect to login after 2 seconds
+        setTimeout(() => navigate("/login"), 2000);
       } else {
-        setError(data.message || "Registration failed.");
+        setError(data.message || "Registration failed");
+        setSuccess("");
       }
     } catch (err) {
       console.error(err);
-      setError("Server error. Please try again later.");
+      setError("Server error, please try again.");
+      setSuccess("");
     }
   };
 
   return (
-    <div className="register-container">
-      <h1 className="register-title">Register</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleRegister}>
+        <h2>Register</h2>
 
-      <form onSubmit={handleRegister}>
-        <label htmlFor="name">Name</label>
-        <input
-          id="name"
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          className="register-input"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
+        {error && <p className="error">{error}</p>}
+        {success && <p className="success">{success}</p>}
 
-        <label htmlFor="email">Email</label>
+        <label>Email</label>
         <input
-          id="email"
           type="email"
-          name="email"
-          placeholder="Email"
-          className="register-input"
-          value={form.email}
-          onChange={handleChange}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
 
-        <label htmlFor="password">Password</label>
+        <label>Password</label>
         <input
-          id="password"
           type="password"
-          name="password"
-          placeholder="Password"
-          className="register-input"
-          value={form.password}
-          onChange={handleChange}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
-        <button type="submit" className="register-button">
-          Register
-        </button>
+        <button type="submit">Register</button>
       </form>
     </div>
   );
-};
-
-export default RegisterPage;
+}

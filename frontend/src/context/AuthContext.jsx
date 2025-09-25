@@ -1,42 +1,53 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const login = async (email, password) => {
-    // 🔹 Current: Fake login
-    if (email === "doctor@example.com" && password === "123456") {
-      setUser({ name: "Dr. Smith", role: "doctor" });
-    } else if (email === "patient@example.com" && password === "123456") {
-      setUser({ name: "Mary Jane", role: "patient" });
+  // Load user from localStorage on startup
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  // Save user to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
-      alert("Invalid credentials!");
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  const login = async (email, password) => {
+    const response = await fetch("http://127.0.0.1:5000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || "Login failed");
     }
 
-    // 🔹 Future: Replace with backend call
-    /*
-    try {
-      const response = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    const data = await response.json();
+    const newUser = {
+      id: data.id,
+      name: data.name || data.email.split("@")[0],
+      email: data.email,
+      role: data.role,
+    };
 
-      if (!response.ok) throw new Error("Login failed");
-
-      const data = await response.json();
-      // data could be: { name: "Dr. John", role: "doctor" }
-      setUser(data);
-    } catch (error) {
-      alert(error.message);
-    }
-    */
+    setUser(newUser);
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
@@ -44,6 +55,8 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

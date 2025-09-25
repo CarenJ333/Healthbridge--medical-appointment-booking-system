@@ -10,32 +10,39 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(""); // reset error
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("http://127.0.0.1:5000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json(); // try parsing JSON
+      } catch {
+        // if backend returned HTML or plain text
+        throw new Error("Server returned invalid response");
+      }
 
-      if (response.ok && data.status === "success") {
-        // save user data (optional)
+      if (response.ok) {
+        // Save user info (so you can use later)
         localStorage.setItem("user", JSON.stringify(data));
 
-        // redirect based on role
+        // Redirect based on role
         if (data.role === "doctor") {
           navigate("/doctor-dashboard");
-        } else if (data.role === "patient") {
-          navigate("/dashboard");
+        } else {
+          navigate("/patient-dashboard");
         }
       } else {
         setError(data.message || "Invalid login");
       }
     } catch (err) {
-      console.error(err);
-      setError("Server error, please try again.");
+      console.error("Login error:", err);
+      setError(err.message || "Server error, please try again.");
     }
   };
 

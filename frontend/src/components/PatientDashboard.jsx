@@ -2,66 +2,121 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const API_URL = "http://127.0.0.1:5000/appointments";
+const DOCTORS_URL = "http://127.0.0.1:5000/doctors";
+
 const PatientDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Fetch appointments from backend
+  // Form state
+  const [selectedDoctor, setSelectedDoctor] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  // Fetch appointments & doctors
   useEffect(() => {
-    fetch("http://localhost:3000/appointments")
-      .then((res) => res.json())
-      .then((data) => {
-        // Filter so patient only sees their own
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchAppointments = async () => {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Failed to fetch appointments");
+
+        const data = await res.json();
+        // Only show logged-in patient's appointments
         const myAppointments = data.filter(
-          (appt) => appt.patient === user.name
+          (appt) => appt.patient === user.email
         );
+
         setAppointments(myAppointments);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching appointments:", err);
+        setError(err.message);
+      } finally {
         setLoading(false);
-      });
-  }, [user.name]);
+      }
+    };
+
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch(DOCTORS_URL);
+        if (!res.ok) throw new Error("Failed to fetch doctors");
+
+        const data = await res.json();
+        setDoctors(data);
+      } catch (err) {
+        console.error("Error fetching doctors:", err);
+      }
+    };
+
+    fetchAppointments();
+    fetchDoctors();
+  }, [user]);
 
   // Cancel appointment
-  const cancelAppointment = (id) => {
-    fetch(`http://localhost:3000/appointments/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Canceled" }),
-    })
-      .then((res) => res.json())
-      .then((updated) =>
-        setAppointments(
-          appointments.map((a) => (a.id === id ? updated : a))
-        )
+  const cancelAppointment = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Canceled" }),
+      });
+      if (!res.ok) throw new Error("Failed to cancel appointment");
+
+      const updated = await res.json();
+      setAppointments((prev) =>
+        prev.map((a) => (a.id === id ? updated : a))
       );
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
-  // Book new appointment (example only — replace with form later)
-  const bookAppointment = () => {
+  // Book new appointment
+  const bookAppointment = async () => {
+    if (!user || !selectedDoctor || !date || !time) {
+      alert("Please fill all fields.");
+      return;
+    }
+
     const newAppointment = {
-      doctor: "Dr. John Doe (Dermatology)",
-      patient: user.name,
-      date: "2025-09-30",
-      time: "03:00 PM",
+      doctor: selectedDoctor,
+      patient: user.email,
+      date,
+      time,
       status: "Pending",
     };
 
-    fetch("http://localhost:3000/appointments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newAppointment),
-    })
-      .then((res) => res.json())
-      .then((data) => setAppointments([...appointments, data]));
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAppointment),
+      });
+      if (!res.ok) throw new Error("Failed to book appointment");
+
+      const data = await res.json();
+      setAppointments((prev) => [...prev, data]);
+
+      // Reset form
+      setSelectedDoctor("");
+      setDate("");
+      setTime("");
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
-  // Status colors
+  // Status color helper
   const getStatusColor = (status) => {
     switch (status) {
       case "Confirmed":
@@ -75,12 +130,17 @@ const PatientDashboard = () => {
     }
   };
 
+  // Logout
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
   if (loading) return <p>Loading appointments...</p>;
+  if (!user) return <p>Please login first.</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+
+  const displayName = user.name || user.email || "Guest";
 
   return (
     <div style={{ display: "flex", fontFamily: "Arial, sans-serif", minHeight: "100vh" }}>
@@ -102,6 +162,9 @@ const PatientDashboard = () => {
             onClick={() => navigate("/dashboard")}
           >
             HealthBridge
+          </h2>
+          <h2 style={{ marginBottom: "30px", fontSize: "20px", fontWeight: "bold" }}>
+            Patient Dashboard
           </h2>
           <p style={{ margin: "15px 0", cursor: "pointer" }} onClick={() => navigate("/dashboard")}>
             Dashboard
@@ -126,7 +189,7 @@ const PatientDashboard = () => {
 
       {/* Main Content */}
       <div style={{ flex: 1, background: "#f1f2f6", padding: "20px" }}>
-        <h1 style={{ marginBottom: "20px" }}>Welcome, {user.name}!</h1>
+        <h1 style={{ marginBottom: "20px" }}>Welcome, {displayName}!</h1>
 
         {/* Metrics */}
         <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
@@ -154,85 +217,95 @@ const PatientDashboard = () => {
           </div>
         </div>
 
-        {/* Appointment Table */}
+        {/* Appointments Table */}
         <div style={{ background: "white", padding: "20px", borderRadius: "10px" }}>
           <h2 style={{ marginBottom: "20px" }}>My Appointments</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Doctor</th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Date</th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Time</th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Status</th>
-                <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.map((appt) => (
-                <tr key={appt.id}>
-                  <td style={{ padding: "10px" }}>{appt.doctor}</td>
-                  <td style={{ padding: "10px" }}>{appt.date}</td>
-                  <td style={{ padding: "10px" }}>{appt.time}</td>
-                  <td
-                    style={{
-                      padding: "10px",
-                      color: getStatusColor(appt.status),
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {appt.status}
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    {appt.status !== "Canceled" && (
-                      <button
-                        onClick={() => cancelAppointment(appt.id)}
-                        style={{
-                          padding: "5px 10px",
-                          marginRight: "5px",
-                          background: "#ff6b81",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "5px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                    <button
-                      style={{
-                        padding: "5px 10px",
-                        background: "#1e90ff",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => navigate(`/reschedule/${appt.id}`)}
-                    >
-                      Reschedule
-                    </button>
-                  </td>
+          {appointments.length === 0 ? (
+            <p>No appointments found.</p>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Doctor</th>
+                  <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Date</th>
+                  <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Time</th>
+                  <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Status</th>
+                  <th style={{ borderBottom: "1px solid #ccc", padding: "10px", textAlign: "left" }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {appointments.map((appt) => (
+                  <tr key={appt.id}>
+                    <td style={{ padding: "10px" }}>{appt.doctor}</td>
+                    <td style={{ padding: "10px" }}>{appt.date}</td>
+                    <td style={{ padding: "10px" }}>{appt.time}</td>
+                    <td style={{ padding: "10px", color: getStatusColor(appt.status), fontWeight: "bold" }}>
+                      {appt.status}
+                    </td>
+                    <td style={{ padding: "10px" }}>
+                      {appt.status !== "Canceled" && (
+                        <button
+                          onClick={() => cancelAppointment(appt.id)}
+                          style={{
+                            padding: "5px 10px",
+                            background: "#ff6b81",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
-          {/* Book Appointment Button */}
-          <button
-            style={{
-              marginTop: "20px",
-              padding: "10px 20px",
-              background: "#2ed573",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-            onClick={bookAppointment}
-          >
-            Book Appointment
-          </button>
+          {/* Book Appointment Form */}
+          <div style={{ marginTop: "30px" }}>
+            <h3>Book Appointment</h3>
+            <select
+              value={selectedDoctor}
+              onChange={(e) => setSelectedDoctor(e.target.value)}
+              style={{ marginRight: "10px", padding: "5px" }}
+            >
+              <option value="">Select Doctor</option>
+              {doctors.map((doc) => (
+                <option key={doc.id} value={doc.name + " (" + doc.specialty + ")"}>
+                  {doc.name} ({doc.specialty})
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              style={{ marginRight: "10px", padding: "5px" }}
+            />
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              style={{ marginRight: "10px", padding: "5px" }}
+            />
+            <button
+              onClick={bookAppointment}
+              style={{
+                padding: "5px 15px",
+                background: "#2ed573",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              Book
+            </button>
+          </div>
         </div>
       </div>
     </div>
