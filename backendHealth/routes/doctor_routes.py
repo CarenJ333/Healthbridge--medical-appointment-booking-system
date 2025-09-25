@@ -13,8 +13,8 @@ def get_doctors():
     result = [
         {
             "id": d.id,
-            "name": getattr(d.user, "name", None),     
-            "email": getattr(d.user, "email", None),
+            "name": d.user.name if d.user and d.user.name else d.user.email,
+            "email": d.user.email if d.user else None,
             "specialty": d.specialty,
             "phone": d.phone,
             "bio": d.bio

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = "http://127.0.0.1:5000/appointments";
-const DOCTORS_URL = "http://127.0.0.1:5000/doctors";
+const API_URL = "http://127.0.0.1:5000/appointments/";
+const DOCTORS_URL = "http://127.0.0.1:5000/doctors/";
 
 const PatientDashboard = () => {
   const { user, logout } = useAuth();
@@ -26,33 +26,33 @@ const PatientDashboard = () => {
       return;
     }
 
+    // Fetch patient's appointments
     const fetchAppointments = async () => {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(API_URL + "?patientId=" + user.id);
         if (!res.ok) throw new Error("Failed to fetch appointments");
-
         const data = await res.json();
-        // Only show logged-in patient's appointments
-        const myAppointments = data.filter(
-          (appt) => appt.patient === user.email
-        );
-
-        setAppointments(myAppointments);
+        setAppointments(data);
       } catch (err) {
-        console.error("Error fetching appointments:", err);
+        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
+    // Fetch all doctors
     const fetchDoctors = async () => {
       try {
         const res = await fetch(DOCTORS_URL);
         if (!res.ok) throw new Error("Failed to fetch doctors");
-
         const data = await res.json();
-        setDoctors(data);
+        // Ensure name is always present
+        const formatted = data.map((d) => ({
+          ...d,
+          name: d.name || "Unknown",
+        }));
+        setDoctors(formatted);
       } catch (err) {
         console.error("Error fetching doctors:", err);
       }
@@ -65,7 +65,7 @@ const PatientDashboard = () => {
   // Cancel appointment
   const cancelAppointment = async (id) => {
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Canceled" }),
@@ -82,41 +82,56 @@ const PatientDashboard = () => {
   };
 
   // Book new appointment
-  const bookAppointment = async () => {
-    if (!user || !selectedDoctor || !date || !time) {
-      alert("Please fill all fields.");
-      return;
-    }
+const bookAppointment = async () => {
+  if (!user || !selectedDoctor || !date || !time) {
+    alert("Please fill all fields.");
+    return;
+  }
 
-    const newAppointment = {
-      doctor: selectedDoctor,
-      patient: user.email,
-      date,
-      time,
-      status: "Pending",
-    };
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newAppointment),
-      });
-      if (!res.ok) throw new Error("Failed to book appointment");
-
-      const data = await res.json();
-      setAppointments((prev) => [...prev, data]);
-
-      // Reset form
-      setSelectedDoctor("");
-      setDate("");
-      setTime("");
-    } catch (err) {
-      alert(err.message);
-    }
+  const newAppointment = {
+    doctor_id: parseInt(selectedDoctor, 10),
+    patient_id: user.id,
+    date,
+    time,
+    status: "Pending",
   };
 
-  // Status color helper
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newAppointment),
+    });
+    if (!res.ok) throw new Error("Failed to book appointment");
+
+    const data = await res.json();
+    const appt = data.appointment; // <-- extract from nested object
+
+    // Map doctor name from doctors array
+    const doctorName = doctors.find(d => d.id === appt.doctor_id)?.name || "Unknown";
+
+    setAppointments((prev) => [
+      ...prev,
+      {
+        id: appt.id,
+        patient_id: appt.patient_id,
+        doctor_name: doctorName,  // <- use doctor_name here
+        date: appt.date,
+        time: appt.time,
+        status: appt.status,
+      },
+    ]);
+
+    // Reset form
+    setSelectedDoctor("");
+    setDate("");
+    setTime("");
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Confirmed":
@@ -130,7 +145,6 @@ const PatientDashboard = () => {
     }
   };
 
-  // Logout
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -236,7 +250,7 @@ const PatientDashboard = () => {
               <tbody>
                 {appointments.map((appt) => (
                   <tr key={appt.id}>
-                    <td style={{ padding: "10px" }}>{appt.doctor}</td>
+                    <td style={{ padding: "10px" }}>{appt.doctor_name}</td>
                     <td style={{ padding: "10px" }}>{appt.date}</td>
                     <td style={{ padding: "10px" }}>{appt.time}</td>
                     <td style={{ padding: "10px", color: getStatusColor(appt.status), fontWeight: "bold" }}>
@@ -275,7 +289,7 @@ const PatientDashboard = () => {
             >
               <option value="">Select Doctor</option>
               {doctors.map((doc) => (
-                <option key={doc.id} value={doc.name + " (" + doc.specialty + ")"}>
+                <option key={doc.id} value={doc.id}>
                   {doc.name} ({doc.specialty})
                 </option>
               ))}

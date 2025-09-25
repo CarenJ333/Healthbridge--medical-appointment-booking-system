@@ -14,8 +14,6 @@ import PatientDashboard from "./components/PatientDashboard";
 import AboutPage from "./pages/AboutPage";
 import ServicesPage from "./pages/ServicesPage";
 import ContactPage from "./pages/ContactPage";
-import AnAppointmentPage from "./pages/AnAppointmentPage";
-import AnAvailabilityPage from "./pages/AnAvailabilityPage";
 import "./App.css";
 
 // ProtectedRoute wrapper
@@ -74,11 +72,7 @@ const App = () => {
 
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/appointments" element={<AnAppointmentPage />} />
-        <Route path="/availability" element={<AnAvailabilityPage />} />
-        
-        
+        <Route path="/contact" element={<ContactPage />} />      
 
       </Routes>
     </div>
