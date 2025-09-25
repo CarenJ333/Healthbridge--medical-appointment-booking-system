@@ -11,6 +11,11 @@ import AppointmentPage from "./pages/AppointmentPage";
 import AvailabilityPage from "./pages/AvailabilityPage";
 import DoctorDashboard from "./components/DoctorDashboard";
 import PatientDashboard from "./components/PatientDashboard";
+import AboutPage from "./pages/AboutPage";
+import ServicesPage from "./pages/ServicesPage";
+import ContactPage from "./pages/ContactPage";
+import AnAppointmentPage from "./pages/AnAppointmentPage";
+import AnAvailabilityPage from "./pages/AnAvailabilityPage";
 import "./App.css";
 
 // ProtectedRoute wrapper
@@ -47,7 +52,7 @@ const App = () => {
         <Route path="/availability-page" element={<AvailabilityPage />} />
 
         {/* Role-based dashboards */}
-        <Route
+       <Route
           path="/doctor-dashboard"
           element={
             <ProtectedRoute role="doctor">
@@ -66,6 +71,15 @@ const App = () => {
 
         {/* Catch-all route for 404 */}
         <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/appointments" element={<AnAppointmentPage />} />
+        <Route path="/availability" element={<AnAvailabilityPage />} />
+        
+        
+
       </Routes>
     </div>
   );
