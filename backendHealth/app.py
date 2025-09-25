@@ -1,3 +1,4 @@
+import os   # <-- ADD THIS
 from flask import Flask, request
 from flask_cors import CORS
 from models.user import db
@@ -14,7 +15,6 @@ def log_request_info():
 
 # --- Config ---
 # Avoid redirect issues by setting a secret key and DB path directly
-# --- Config ---
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(BASE_DIR, "instance", "healthbridge.db")
 
@@ -24,7 +24,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev")
 
 print("DB URI:", app.config["SQLALCHEMY_DATABASE_URI"])
 
-# Enable CORS properly (very important!)
+# Enable CORS properly (so frontend 5173 can connect)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Initialize database
