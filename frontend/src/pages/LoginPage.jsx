@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // reset error before login attempt
+    setError(""); 
 
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
