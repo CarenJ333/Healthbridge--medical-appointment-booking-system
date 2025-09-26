@@ -9,11 +9,12 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  // 👇 Use environment variable
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
@@ -22,7 +23,12 @@ export default function RegisterPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json(); // try parsing JSON safely
+      } catch {
+        throw new Error("Server returned invalid response");
+      }
 
       if (response.ok) {
         setSuccess(data.message || "Registration successful!");
@@ -38,7 +44,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       console.error("Register error:", err);
-      setError("Server error, please try again.");
+      setError(err.message || "Server error, please try again.");
       setSuccess("");
     }
   };

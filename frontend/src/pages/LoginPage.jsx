@@ -8,12 +8,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // 👇 Use environment variable instead of hardcoding
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // reset error
+    setError(""); // reset error before login attempt
 
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -24,14 +23,16 @@ export default function LoginPage() {
 
       let data;
       try {
-        data = await response.json(); // try parsing JSON
+        data = await response.json(); // always attempt JSON parse
       } catch {
         throw new Error("Server returned invalid response");
       }
 
       if (response.ok) {
+        // Save logged-in user to localStorage
         localStorage.setItem("user", JSON.stringify(data));
 
+        // Redirect user based on role
         if (data.role === "doctor") {
           navigate("/doctor-dashboard");
         } else {
