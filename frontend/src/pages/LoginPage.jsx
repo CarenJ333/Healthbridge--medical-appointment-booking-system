@@ -8,12 +8,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // 👇 Use environment variable instead of hardcoding
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(""); // reset error
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -23,15 +26,12 @@ export default function LoginPage() {
       try {
         data = await response.json(); // try parsing JSON
       } catch {
-        // if backend returned HTML or plain text
         throw new Error("Server returned invalid response");
       }
 
       if (response.ok) {
-        // Save user info (so you can use later)
         localStorage.setItem("user", JSON.stringify(data));
 
-        // Redirect based on role
         if (data.role === "doctor") {
           navigate("/doctor-dashboard");
         } else {

@@ -9,20 +9,23 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  // 👇 Use environment variable
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }), // no role here
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(data.message);
+        setSuccess(data.message || "Registration successful!");
         setError("");
         setEmail("");
         setPassword("");
@@ -34,7 +37,7 @@ export default function RegisterPage() {
         setSuccess("");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Register error:", err);
       setError("Server error, please try again.");
       setSuccess("");
     }

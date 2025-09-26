@@ -1,4 +1,4 @@
-// src/components/LoginForm.jsx
+
 import { useState } from "react";
 
 export default function LoginForm({ onLogin }) {
@@ -7,7 +7,7 @@ export default function LoginForm({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // call parent handler (could connect to backend API)
+    
     if (onLogin) onLogin({ email, password });
   };
 
