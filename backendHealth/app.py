@@ -23,10 +23,10 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev")
 
 print("DB URI:", app.config["SQLALCHEMY_DATABASE_URI"])
 
-# --- Enable CORS only for your frontend domain ---
+# --- Enable CORS (temporary: allow all origins for testing) ---
 CORS(
     app,
-    resources={r"/*": {"origins": ["https://healthbridge-medical-appointment-ul.vercel.app"]}},
+    resources={r"/*": {"origins": "*"}},
     supports_credentials=True
 )
 
