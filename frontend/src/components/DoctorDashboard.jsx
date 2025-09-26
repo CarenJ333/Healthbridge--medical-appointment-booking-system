@@ -14,7 +14,7 @@ const DoctorDashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    fetch(`http://127.0.0.1:5000/appointments?doctorId=${user.id}`)
+    fetch(`http://healthbridge-medical-appointment.onrender.com/appointments?doctorId=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setAppointments(data);
@@ -28,7 +28,7 @@ const DoctorDashboard = () => {
 
   // Update status (Confirm/Cancel)
   const updateStatus = (id, newStatus) => {
-    fetch(`http://127.0.0.1:5000/appointments/${id}`, {
+    fetch(`http://healthbridge-medical-appointment.onrender.com/appointments/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = "http://127.0.0.1:5000/appointments/";
-const DOCTORS_URL = "http://127.0.0.1:5000/doctors/";
+const API_URL = "http://healthbridge-medical-appointment.onrender.com/appointments/";
+const DOCTORS_URL = "http://healthbridge-medical-appointment.onrender.com/doctors/";
 
 const PatientDashboard = () => {
   const { user, logout } = useAuth();
