@@ -1,7 +1,8 @@
 // src/api/doctorApi.js
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://healthbridge-medical-appointment.onrender.com";
+
 
 export const getDoctors = async () => {
   const res = await axios.get(`${API_URL}/doctors`);

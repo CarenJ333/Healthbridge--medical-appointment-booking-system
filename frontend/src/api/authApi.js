@@ -1,7 +1,8 @@
 // src/api/authApi.js
 import axios from "axios";
 
-const API_URL = "http://localhost:5000"; // Flask backend
+const API_URL = "http://healthbridge-medical-appointment.onrender.com";
+
 
 export const loginUser = async (credentials) => {
   const res = await axios.post(`${API_URL}/login`, credentials);
