@@ -32,6 +32,8 @@ export default function LoginPage() {
         // Save logged-in user to localStorage
         localStorage.setItem("user", JSON.stringify(data));
 
+        setUser(data);   
+
         // Redirect user based on role
         if (data.role === "doctor") {
           navigate("/doctor-dashboard");

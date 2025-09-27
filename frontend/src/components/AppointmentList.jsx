@@ -5,7 +5,7 @@ const AppointmentList = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    fetch(`http://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments?user_id=${user.id}`)
+    fetch(`https://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments?user_id=${user.id}`)
       .then((res) => res.json())
       .then((data) => setAppointments(data))
       .catch((err) => console.error(err));

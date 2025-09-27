@@ -11,7 +11,7 @@ const AppointmentForm = () => {
     const user = JSON.parse(localStorage.getItem("user"));
 
     try {
-      const response = await fetch("http://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments/", {
+      const response = await fetch("https://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

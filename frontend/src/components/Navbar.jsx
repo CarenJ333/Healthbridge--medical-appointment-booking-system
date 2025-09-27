@@ -28,33 +28,53 @@ export default function Navbar({ onLoginClick, onRegisterClick }) {
 
         {/* Auth Buttons */}
         <div className="navbar-auth">
-          <button
-            className="btn btn-register"
-            onClick={(e) => {
-              e.preventDefault();
-              if (onRegisterClick) {
-                onRegisterClick();
-              } else {
-                window.location.href = "/register"; // fallback
-              }
-            }}
-          >
-            Register
-          </button>
+          {!user ? (
+            <>
+              <button
+                className="btn btn-register"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onRegisterClick) {
+                    onRegisterClick();
+                  } else {
+                    window.location.href = "/register"; // fallback
+                  }
+                }}
+              >
+                Register
+              </button>
 
-          <button
-            className="btn btn-login"
-            onClick={(e) => {
-              e.preventDefault();
-              if (onLoginClick) {
-                onLoginClick();
-              } else {
-                window.location.href = "/login"; // fallback
-              }
-            }}
-          >
-            Login
-          </button>
+              <button
+                className="btn btn-login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onLoginClick) {
+                    onLoginClick();
+                  } else {
+                    window.location.href = "/login"; // fallback
+                  }
+                }}
+              >
+                Login
+              </button>
+            </>
+          ) : (
+            <>
+              {user.role === "doctor" && (
+                <Link to="/doctor-dashboard" className="btn btn-dashboard">
+                  Doctor Dashboard
+                </Link>
+              )}
+              {user.role === "patient" && (
+                <Link to="/patient-dashboard" className="btn btn-dashboard">
+                  Patient Dashboard
+                </Link>
+              )}
+              <button className="btn btn-logout" onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          )}
         </div>
       </div>
     </nav>

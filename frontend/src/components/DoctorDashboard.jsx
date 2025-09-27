@@ -14,7 +14,7 @@ const DoctorDashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    fetch(`http://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments?doctorId=${user.id}`)
+    fetch(`https://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments?doctorId=${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setAppointments(data);
@@ -28,7 +28,7 @@ const DoctorDashboard = () => {
 
   // Update status (Confirm/Cancel)
   const updateStatus = (id, newStatus) => {
-    fetch(`http://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments/${id}`, {
+    fetch(`https://healthbridge-medical-appointment-booking-okbi.onrender.com/appointments/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
