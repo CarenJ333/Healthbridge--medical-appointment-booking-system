@@ -1,7 +1,7 @@
 // src/api/appointmentApi.js
 import axios from "axios";
 
-const API_URL = "http://healthbridge-medical-appointment.onrender.com";
+const API_URL = "http://healthbridge-medical-appointment-booking-okbi.onrender.com";
 
 
 export const bookAppointment = async (appointmentData) => {

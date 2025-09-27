@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   }, [user]);
 
   const login = async (email, password) => {
-    const response = await fetch("http://healthbridge-medical-appointment.onrender.com/auth/login", {
+    const response = await fetch("http://healthbridge-medical-appointment-booking-okbi.onrender.com/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
