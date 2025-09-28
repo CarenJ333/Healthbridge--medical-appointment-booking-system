@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useContext } from "react";
-import { UserContext } from "../UserContext";
+import { UserContext } from "../UserContext.jsx";
 import "../App.css";
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
   const { user } = useContext(UserContext);
-  
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
