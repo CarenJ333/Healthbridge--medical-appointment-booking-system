@@ -39,13 +39,18 @@ export default function ContactPage() {
 
       <section className="contact-form-section">
         <h2>Send Us a Message</h2>
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" required />
-          <input type="email" placeholder="Your Email" required />
-          <textarea placeholder="Your Message" rows="5" required></textarea>
+        <form 
+          className="contact-form"
+          action="https://formspree.io/f/mldpbpaj" 
+          method="POST"
+        >
+          <input type="text" name="name" placeholder="Your Name" required />
+          <input type="email" name="email" placeholder="Your Email" required />
+          <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
           <button type="submit" className="btn primary">Send Message</button>
         </form>
       </section>
+
     </div>
   );
 }

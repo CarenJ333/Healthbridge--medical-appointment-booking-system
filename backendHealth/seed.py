@@ -20,7 +20,7 @@ with app.app_context():
         existing_user = User.query.filter_by(email=doc["email"]).first()
         if not existing_user:
             user = User(
-                name=doc["name"],   # <-- use new field
+                name=doc["name"],   
                 email=doc["email"],
                 password=generate_password_hash("doctor123"),
                 role="doctor"
