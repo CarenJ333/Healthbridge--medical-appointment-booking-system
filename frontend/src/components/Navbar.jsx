@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useContext } from "react";
-import { UserContext } from "../UserContext.jsx";
+import { UserContext } from "../context/UserContext.jsx";
+
 import "../App.css";
 
 export default function Navbar({ onLoginClick, onRegisterClick }) {
